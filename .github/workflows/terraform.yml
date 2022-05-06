@@ -41,14 +41,6 @@ jobs:
       #   run: |-
       #     curl https://secretmanager.googleapis.com/v1/projects/${{secrets.GCP_PROJECT_ID}}/secrets/my-secret/versions/1:access \
       #       --header "Authorization: Bearer ${{ steps.auth.outputs.access_token }}"
-
-      - name: 'Use gcloud CLI'
-        run: |
-          gcloud iam service-accounts list
-
-      - name: check-gcp-creds
-        run: |
-          ls -la ~/.config
         
       - id: idtoken
         run: |
@@ -92,6 +84,14 @@ jobs:
           curl https://secretmanager.googleapis.com/v1/projects/${{ secrets.GCP_PROJECT_ID }}/secrets/my-secret/versions/1:access \
             --header "Authorization: Bearer ${{ steps.access_token.outputs.access_token }}"
           echo "Done!!!"
+
+      - name: check-gcp-creds
+        run: |
+          ls -la ~/.config
+
+      - name: 'Use gcloud CLI'
+        run: |
+          gcloud iam service-accounts list
 
     # Checkout the repository to the GitHub Actions runner
       - name: Checkout
