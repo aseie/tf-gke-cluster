@@ -26,15 +26,22 @@ jobs:
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v0'
 
-      - id: 'gcp-auth'
+      - id: 'auth'
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v0.4.0'
         with:
           workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}/providers/${{ secrets.GCP_IDENTITY_PROVIDER }}'
           service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
+      
+      - name: 'Access secret'
+        run: |-
+          curl https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret/versions/1:access \
+            --header "Authorization: Bearer ${{ steps.auth.outputs.access_token }}"
 
       - name: 'Use gcloud CLI'
-        run: 'gcloud alpha storage ls'
+        run: |
+          gcloud components update
+          gcloud alpha storage ls
 
       - name: check-gcp-creds
         run: |
