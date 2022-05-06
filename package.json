@@ -1,5 +1,11 @@
 {
   "name": "tf-gke-cluster",
   "version": "1.0.0",
-  "description": "For gke private cluster"
+  "description": "For gke private cluster",
+  "scripts": {
+    "release": "npx semantic-release"
+  },
+  "dependencies": {
+    "semantic-release": "^19.0.2"
+  }
 }
