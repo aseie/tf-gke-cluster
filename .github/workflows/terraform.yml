@@ -32,8 +32,19 @@ jobs:
 
       - name: get-token-values
         run: |
-          echo ${ACTIONS_ID_TOKEN_REQUEST_URL}
           echo ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}
+          echo ${ACTIONS_ID_TOKEN_REQUEST_URL}
+
+      - name: check-gcp-creds
+        run: |
+          cat ~/.config/gcloud/application_default_credentials.json
+        
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
+
+      - name: 'Use gcloud CLI'
+        run: 'gcloud info'
+
       # - id: idtoken
       #   run: |
       #     token=${ACTIONS_ID_TOKEN_REQUEST_TOKEN}
