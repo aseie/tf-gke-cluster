@@ -30,12 +30,13 @@ jobs:
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v0.4.0'
         with:
+          token_format: 'access_token'
           workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}/providers/${{ secrets.GCP_IDENTITY_PROVIDER }}'
           service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
       
       - name: 'Access secret'
         run: |-
-          curl https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret/versions/1:access \
+          curl https://secretmanager.googleapis.com/v1/projects/${{secrets.GCP_PROJECT_ID}}/secrets/my-secret/versions/1:access \
             --header "Authorization: Bearer ${{ steps.auth.outputs.access_token }}"
 
       - name: 'Use gcloud CLI'
