@@ -1,5 +1,5 @@
 init:
-	cd ./infra && terraform init
+	cd ./infra && terraform init -reconfigure
 
 validate:
 	cd ./infra && terraform validate
