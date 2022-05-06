@@ -67,6 +67,7 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: GKE-infra
     steps:
       - name: Checkout
