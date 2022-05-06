@@ -21,6 +21,13 @@ jobs:
         shell: bash
 
     steps:
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0.4.0'
+      with:
+        workload_identity_provider: 'projects/941820449667/locations/global/workloadIdentityPools/github-aseie-pool/providers/github-provider'
+        service_account: 'terrafom-labs@adrianoseie-lab.iam.gserviceaccount.com'
+
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v3
