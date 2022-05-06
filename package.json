@@ -1,0 +1,5 @@
+{
+  "name": "tf-gke-cluster",
+  "version": "1.0.0",
+  "description": "For gke private cluster"
+}
