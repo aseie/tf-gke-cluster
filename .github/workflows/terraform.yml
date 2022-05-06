@@ -35,7 +35,6 @@ jobs:
           workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}/providers/${{ secrets.GCP_IDENTITY_PROVIDER }}'
           service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
           create_credentials_file: true
-          activate_credentials_file: true
       
       - name: 'Access secret'
         run: |-
