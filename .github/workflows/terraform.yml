@@ -13,7 +13,7 @@ permissions:
 jobs:
 
   GKE-infra:
-    name: 'auth to gcp'
+    name: 'gcp infra'
     runs-on: ubuntu-latest
     environment: lab
 
@@ -23,59 +23,59 @@ jobs:
         shell: bash
 
     steps:
-      # - id: 'auth'
-      #   name: 'Authenticate to Google Cloud'
-      #   uses: 'google-github-actions/auth@v0.4.0'
-      #   with:
-      #     workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/@${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}/providers/${{ GCP_IDENTITY_PROVIDER }}'
-      #     service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
+      - id: 'gcp-auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0.4.0'
+        with:
+          workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/@${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}/providers/${{ GCP_IDENTITY_PROVIDER }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
 
       - name: get-token-values
         run: |
-          echo ${ACTIONS_ID_TOKEN_REQUEST_URL} > url.txt
-          echo ${ACTIONS_ID_TOKEN_REQUEST_TOKEN} > token.txt
-      - id: idtoken
-        run: |
-          token=${ACTIONS_ID_TOKEN_REQUEST_TOKEN}
-          runtimeUrl=${ACTIONS_ID_TOKEN_REQUEST_URL}
-          runtimeUrl="${runtimeUrl}&audience=google-wlif"
-          ID_TOKEN=$(curl -H "Authorization: bearer ${token}" ${runtimeUrl} | jq -r ".value")
-          echo ::set-output name=idtoken::$ID_TOKEN
-          echo $ID_TOKEN > idtoken.txt
-      - id: sts_token
-        run: |
-          STS_TOKEN=$(curl -0 -X POST https://sts.googleapis.com/v1/token \
-              -H 'Content-Type: text/json; charset=utf-8' \
-              -d @- <<EOF | jq -r .access_token
-              {
-                  "audience"           : "//iam.googleapis.com/projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{secrets.GCP_IDENTITY_PROVIDER_POOL}}/providers/${{secrets.GCP_IDENTITY_PROVIDER}}",
-                  "grantType"          : "urn:ietf:params:oauth:grant-type:token-exchange",
-                  "requestedTokenType" : "urn:ietf:params:oauth:token-type:access_token",
-                  "scope"              : "https://www.googleapis.com/auth/cloud-platform",
-                  "subjectTokenType"   : "urn:ietf:params:oauth:token-type:jwt",
-                  "subjectToken"       : "${{steps.idtoken.outputs.idtoken}}"
-              }
-          EOF)
-          echo $STS_TOKEN > sts_token.txt
-          echo ::set-output name=sts_token::$STS_TOKEN
-      - id: access_token
-        shell: bash
-        run: |
-          ACCESS_TOKEN=$(curl -0 -X POST https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${{secrets.GCP_SERVICE_ACCOUNT}}:generateAccessToken \
-              -H "Content-Type: text/json; charset=utf-8" \
-              -H "Authorization: Bearer ${{ steps.sts_token.outputs.sts_token }}" \
-              -d @- <<EOF | jq -r .accessToken
-              {
-                  "scope": [ "https://www.googleapis.com/auth/cloud-platform" ]
-              }
-          EOF)
-          echo $ACCESS_TOKEN > access_token.txt
-          echo ::set-output name=access_token::$ACCESS_TOKEN
-      - name: 'Access secret'
-        run: |-
-          curl https://secretmanager.googleapis.com/v1/projects/${{ secrets.GCP_PROJECT_ID }}/secrets/my-secret/versions/1:access \
-            --header "Authorization: Bearer ${{ steps.access_token.outputs.access_token }}"
-          echo "Done!!!"
+          echo ${ACTIONS_ID_TOKEN_REQUEST_URL}
+          echo ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}
+      # - id: idtoken
+      #   run: |
+      #     token=${ACTIONS_ID_TOKEN_REQUEST_TOKEN}
+      #     runtimeUrl=${ACTIONS_ID_TOKEN_REQUEST_URL}
+      #     runtimeUrl="${runtimeUrl}&audience=google-wlif"
+      #     ID_TOKEN=$(curl -H "Authorization: bearer ${token}" ${runtimeUrl} | jq -r ".value")
+      #     echo ::set-output name=idtoken::$ID_TOKEN
+      #     echo $ID_TOKEN > idtoken.txt
+      # - id: sts_token
+      #   run: |
+      #     STS_TOKEN=$(curl -0 -X POST https://sts.googleapis.com/v1/token \
+      #         -H 'Content-Type: text/json; charset=utf-8' \
+      #         -d @- <<EOF | jq -r .access_token
+      #         {
+      #             "audience"           : "//iam.googleapis.com/projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{secrets.GCP_IDENTITY_PROVIDER_POOL}}/providers/${{secrets.GCP_IDENTITY_PROVIDER}}",
+      #             "grantType"          : "urn:ietf:params:oauth:grant-type:token-exchange",
+      #             "requestedTokenType" : "urn:ietf:params:oauth:token-type:access_token",
+      #             "scope"              : "https://www.googleapis.com/auth/cloud-platform",
+      #             "subjectTokenType"   : "urn:ietf:params:oauth:token-type:jwt",
+      #             "subjectToken"       : "${{steps.idtoken.outputs.idtoken}}"
+      #         }
+      #     EOF)
+      #     echo $STS_TOKEN > sts_token.txt
+      #     echo ::set-output name=sts_token::$STS_TOKEN
+      # - id: access_token
+      #   shell: bash
+      #   run: |
+      #     ACCESS_TOKEN=$(curl -0 -X POST https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${{secrets.GCP_SERVICE_ACCOUNT}}:generateAccessToken \
+      #         -H "Content-Type: text/json; charset=utf-8" \
+      #         -H "Authorization: Bearer ${{ steps.sts_token.outputs.sts_token }}" \
+      #         -d @- <<EOF | jq -r .accessToken
+      #         {
+      #             "scope": [ "https://www.googleapis.com/auth/cloud-platform" ]
+      #         }
+      #     EOF)
+      #     echo $ACCESS_TOKEN > access_token.txt
+      #     echo ::set-output name=access_token::$ACCESS_TOKEN
+      # - name: 'Access secret'
+      #   run: |-
+      #     curl https://secretmanager.googleapis.com/v1/projects/${{ secrets.GCP_PROJECT_ID }}/secrets/my-secret/versions/1:access \
+      #       --header "Authorization: Bearer ${{ steps.access_token.outputs.access_token }}"
+      #     echo "Done!!!"
 
     # Checkout the repository to the GitHub Actions runner
       - name: Checkout
