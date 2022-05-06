@@ -28,6 +28,6 @@ provider "helm" {
 terraform {
   backend "gcs" {
     bucket = "adriano-seie-labs-tfstate-bucket"
-    prefix = "terraform/state"
+    prefix = "terraform/tf-gke-cluster/state"
   }
 }
