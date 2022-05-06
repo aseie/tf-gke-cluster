@@ -1,0 +1,87 @@
+name: 'gke-infra'
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+
+  GKE-infra:
+    name: 'gcp infra'
+    runs-on: ubuntu-latest
+    environment: lab
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0.4.0'
+        with:
+          token_format: 'access_token'
+          access_token_lifetime: 900s
+          workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}/providers/${{ secrets.GCP_IDENTITY_PROVIDER }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
+          create_credentials_file: true
+      
+    # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Install the latest version of Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      # Initialize a new or existing Terraform working directory by creating initial files
+      - name: init
+        run: make init
+
+      # Checks terraform syntax
+      - name: validate
+        run: make validate
+
+      # Generates an execution plan for Terraform
+      - name: plan
+        run: make plan
+
+        # On push to main
+      - name: deploy
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: make deploy
+      
+      # # Delete all terraform resources
+      # - name: destroy
+      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      #   run: make destroy
+
+  release:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: GKE-infra
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Release
+        run: npm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
