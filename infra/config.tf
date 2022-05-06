@@ -27,7 +27,8 @@ provider "helm" {
 # https://www.terraform.io/language/settings/backends/gcs
 terraform {
   backend "gcs" {
-    bucket = "adriano-seie-labs-tfstate-bucket"
+    # bucket = "adriano-seie-labs-tfstate-bucket"
+    bucket = "gke-terraform-state-bucket"
     prefix = "terraform/tf-gke-cluster/state"
   }
 }
