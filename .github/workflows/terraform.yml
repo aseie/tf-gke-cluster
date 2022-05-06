@@ -44,7 +44,7 @@ jobs:
 
       - name: 'Use gcloud CLI'
         run: |
-          gcloud components update
+          gcloud components install alpha
           gcloud alpha storage ls
 
       - name: check-gcp-creds
