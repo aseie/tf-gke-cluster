@@ -61,9 +61,8 @@ jobs:
         run: make deploy
       
       # # Delete all terraform resources
-      # - name: destroy
-      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      #   run: make destroy
+      - name: destroy
+        run: make destroy
 
   release:
     runs-on: ubuntu-latest
