@@ -46,9 +46,11 @@ jobs:
           workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}/providers/${{ secrets.GCP_IDENTITY_PROVIDER }}'
           service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
           create_credentials_file: true
+      
+      - name: echo
         run: |
-          echo "${GOOGLE_APPLICATION_CREDENTIALS}"
-          echo "${access_token}"
+          echo "${{ steps.gcp-auth.outputs.GOOGLE_APPLICATION_CREDENTIALS }}"
+          echo "${{ steps.gcp-auth.outputs.access_token }}"
       
   gke-infra-build:
     name: 'gcp-infra-build'
