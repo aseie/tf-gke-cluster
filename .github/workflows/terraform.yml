@@ -20,7 +20,7 @@ permissions:
 jobs:
 
   gcp-auth:
-    name: 'gcp authetication using Workload Identity'
+    name: 'gcp authetication'
     runs-on: ubuntu-latest
     environment: dev
 
@@ -45,7 +45,7 @@ jobs:
           create_credentials_file: true
       
   gke-infra-build:
-    name: 'gcp infra build'
+    name: 'gcp-infra-build'
     runs-on: ubuntu-latest
     needs:
       - gcp-auth
@@ -68,7 +68,7 @@ jobs:
       # Initialize a new or existing Terraform working directory by creating initial files
       - name: init
         run: |
-          echo "${{ needs.gcp-auth.outputs.id_token }}"
+          echo "${{ needs.gcp-auth.outputs.access_token }}"
           make init
         env:
           TF_VAR_gcp_access_token: ${{ needs.gcp-auth.outputs.access_token }}
@@ -88,7 +88,7 @@ jobs:
           path: 'plan.tfplan'
 
   gke-infra-deploy:
-    name: 'gcp infra deployment'
+    name: 'gcp-infra-deploy'
     runs-on: ubuntu-latest
     needs:
       - gke-infra-build
