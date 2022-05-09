@@ -68,10 +68,14 @@ jobs:
         run: make plan
 
       - name: Upload tf-plan
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3
         with:
           name: 'terraform-plan'
           path: 'plan.tfplan'
+
+      - name: List files
+        run: |
+          ls -la
       
   gke-infra-deploy:
     name: 'gcp-infra-deploy'
@@ -111,10 +115,10 @@ jobs:
       # On push to main
       # - uses: actions/checkout@v2
       - name: Download a tf-plan
-        uses: actions/download-artifact@v2.2.4
+        uses: actions/download-artifact@v3
         with:
           name: 'terraform-plan'
-          path: 'plan.tfplan'
+          # path: 'plan.tfplan'
     
       - name: tf-deploy
         if: github.event.inputs.job-name == github.job
