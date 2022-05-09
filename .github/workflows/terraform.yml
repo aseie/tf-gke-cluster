@@ -23,13 +23,12 @@ env:
   TF_VAR_project_region: "europe-west3"
   TF_VAR_owner: "Adriano Seie"
   TF_VAR_environment: "dev"
+
 jobs:
 
   gke-infra-build:
     name: 'gcp-infra-build'
     runs-on: ubuntu-latest
-    needs:
-      - gcp-auth
     environment: dev
   
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
