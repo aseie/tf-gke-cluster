@@ -71,7 +71,7 @@ jobs:
           echo "${{ needs.gcp-auth.outputs.id_token }}"
           make init
         env:
-          TF_VAR_gcp_access_token: ${{ needs.gcp-auth.outputs.id_token }}
+          TF_VAR_gcp_access_token: ${{ needs.gcp-auth.outputs.access_token }}
 
       # Checks terraform syntax
       - name: validate
