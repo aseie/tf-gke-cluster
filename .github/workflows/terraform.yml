@@ -33,6 +33,10 @@ jobs:
       id-token: write
       contents: read
 
+    outputs:
+      access_token: ${{ steps.auth.outputs.access_token }}
+      credentials_file_path: ${{ steps.auth.outputs.credentials_file_path }}
+    
     steps:
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
@@ -69,6 +73,7 @@ jobs:
       - name: init
         run: |
           echo "${{ needs.gcp-auth.outputs.access_token }}"
+          echo "${{ needs.gcp-auth.outputs.credentials_file_path }}"
           make init
         env:
           TF_VAR_gcp_access_token: ${{ needs.gcp-auth.outputs.access_token }}
