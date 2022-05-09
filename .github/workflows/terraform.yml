@@ -71,8 +71,6 @@ jobs:
       # Initialize a new or existing Terraform working directory by creating initial files
       - name: init
         run: |
-          # echo "${{ needs.gcp-auth.outputs.credentials_file_path }}"
-          # ls -la "${{ needs.gcp-auth.outputs.credentials_file_path }}"
           make init
         env:
           TF_VAR_credentials_file_path: ${{ needs.gcp-auth.outputs.credentials_file_path }}
