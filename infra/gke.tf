@@ -2,7 +2,7 @@ module "kubernetes-engine" {
   source  = "registry.terraform.io/terraform-google-modules/kubernetes-engine/google//modules/private-cluster"
   version = "18.0.0"
 
-  project_id = var.provider_project_id
+  project_id = var.project_id
   zones      = data.google_compute_zones.available.names
   region     = var.region
   name       = local.gke.cluster_name

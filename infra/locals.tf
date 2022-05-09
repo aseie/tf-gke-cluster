@@ -1,11 +1,10 @@
 locals {
     common_tags = {
-        env               = var.env
+        env               = var.environment
         owner             = var.owner
-        project_id        = var.provider_project_id
         region            = var.region
   }
-    global_resource_prefix = "${var.env}-${var.prefix}"
+    global_resource_prefix = "${var.environment}-${var.prefix}"
 
     service = {
         application = "devops"

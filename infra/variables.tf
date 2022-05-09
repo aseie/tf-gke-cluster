@@ -1,13 +1,12 @@
-variable "provider_project_id" {
+variable "project_id" {
   description = "Project to be used within the GCP Provider."
   type        = string
-  default     = "adrianoseie-lab"
+  # default     = "adrianoseie-lab"
 }
 
-variable "env" {
+variable "environment" {
   type        = string
   description = "Environment identifier for the resources."
-  default     = "dev"
 }
 
 variable "prefix" {
@@ -137,17 +136,12 @@ variable "cloudnat_enabled" {
   default     = true
 }
 variable "region" {
-  default = "europe-west3"
+  # default = "europe-west3"
 }
 
 variable "project_name" {
-  default = "adriano-seie-labs"
+  default = "gke-aseie-labs"
 }
 
 variable "owner" {
-  default = "adriano_seie"
-}
-
-variable "gcp_application_credentials" {
-  description = "GCP gcp_application_credentials generated using google-github-actions/auth@v0.4.0 and OIDC"
 }

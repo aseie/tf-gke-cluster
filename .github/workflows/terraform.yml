@@ -15,50 +15,23 @@ on:
         required: true
 
 permissions:
+  id-token: write
   contents: read
 
+env:
+  TF_VAR_project_id: "${{ secrets.GCP_PROJECT_ID}}"
+  TF_VAR_project_region: "europe-west3"
+  TF_VAR_owner: "Adriano Seie"
+  TF_VAR_environment: "dev"
 jobs:
 
-  gcp-auth:
-    name: 'gcp authetication'
-    runs-on: ubuntu-latest
-    environment: dev
-
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    defaults:
-      run:
-        shell: bash
-    
-    permissions:
-      id-token: write
-      contents: read
-
-    # outputs:
-    #   credentials_file_path: ${{ steps.auth.outputs.credentials_file_path }}
-    
-    steps:
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v0.4.0'
-        with:
-          token_format: 'access_token'
-          access_token_lifetime: 900s
-          workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}/providers/${{ secrets.GCP_IDENTITY_PROVIDER }}'
-          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
-          create_credentials_file: true
-      
-      - name: echo
-        run: |
-          echo "${{ steps.gcp-auth.outputs.GOOGLE_APPLICATION_CREDENTIALS }}"
-          echo "${{ steps.gcp-auth.outputs.access_token }}"
-      
   gke-infra-build:
     name: 'gcp-infra-build'
     runs-on: ubuntu-latest
     needs:
       - gcp-auth
     environment: dev
-
+  
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
@@ -69,17 +42,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0.4.0'
+        with:
+          token_format: 'access_token'
+          access_token_lifetime: 900s
+          workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}/providers/${{ secrets.GCP_IDENTITY_PROVIDER }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
+          create_credentials_file: true
+
       # Install the latest version of Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
 
       # Initialize a new or existing Terraform working directory by creating initial files
-      - name: init
-        run: |
-          echo "${{ needs.gcp-auth.outputs.GOOGLE_APPLICATION_CREDENTIALS }}"
-          make init
-        env:
-          TF_VAR_gcp_application_credentials: ${{ needs.gcp-auth.outputs.GOOGLE_APPLICATION_CREDENTIALS }}
+      - name: tf-init
+        run: make init
 
       # Checks terraform syntax
       - name: validate
@@ -94,7 +73,7 @@ jobs:
         with:
           name: 'terraform-plan'
           path: 'plan.tfplan'
-
+      
   gke-infra-deploy:
     name: 'gcp-infra-deploy'
     runs-on: ubuntu-latest

@@ -3,7 +3,7 @@ module "network" {
   version = "4.0.1"
 
   network_name                           = "${local.global_resource_prefix}-vpc"
-  project_id                             = var.provider_project_id
+  project_id                             = var.project_id
   auto_create_subnetworks                = false
   delete_default_internet_gateway_routes = false
   mtu                                    = 1460
@@ -63,7 +63,7 @@ module "network" {
 resource "google_compute_router" "this" {
   count = var.cloudnat_enabled ? 1 : 0
 
-  project = var.provider_project_id
+  project = var.project_id
   name    = "${local.global_resource_prefix}-nat-router"
   network = module.network.network_name
   region  = var.region
@@ -75,7 +75,7 @@ module "cloud-nat" {
   source  = "registry.terraform.io/terraform-google-modules/cloud-nat/google"
   version = "~> 2.0.0"
 
-  project_id                         = var.provider_project_id
+  project_id                         = var.project_id
   region                             = var.region
   router                             = google_compute_router.this[0].name
   name                               = "${local.global_resource_prefix}-nat-config"
