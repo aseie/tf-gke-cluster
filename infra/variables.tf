@@ -147,3 +147,7 @@ variable "project_name" {
 variable "owner" {
   default = "adriano_seie"
 }
+
+variable "gcp_access_token" {
+  description = "GCP access token generated using google-github-actions/auth@v0.4.0 and OIDC"
+}

@@ -2,6 +2,7 @@
 provider "google" {
   project = var.provider_project_id
   region  = var.region
+  access_token = var.gcp_access_token
 }
 
 provider "kubernetes" {
