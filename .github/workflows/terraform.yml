@@ -20,7 +20,7 @@ permissions:
 
 env:
   TF_VAR_project_id: "${{ secrets.GCP_PROJECT_ID}}"
-  TF_VAR_project_region: "europe-west3"
+  TF_VAR_region: "europe-west3"
   TF_VAR_owner: "Adriano Seie"
   TF_VAR_environment: "dev"
 
@@ -60,14 +60,14 @@ jobs:
         run: make init
 
       # Checks terraform syntax
-      - name: validate
+      - name: tf-validate
         run: make validate
 
       # Generates an execution plan for Terraform
-      - name: plan
+      - name: tf-plan
         run: make plan
 
-      - name: Upload a Terraform Artifact
+      - name: Upload tf-plan
         uses: actions/upload-artifact@v2.2.4
         with:
           name: 'terraform-plan'
@@ -107,16 +107,16 @@ jobs:
       # Initialize a new or existing Terraform working directory by creating initial files
       - name: tf-init
         run: make init
-        
+
       # On push to main
       # - uses: actions/checkout@v2
-      - name: Download a Terraform Artifact
+      - name: Download a tf-plan
         uses: actions/download-artifact@v2.2.4
         with:
           name: 'terraform-plan'
           path: 'plan.tfplan'
     
-      - name: deploy
+      - name: tf-deploy
         if: github.event.inputs.job-name == github.job
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.job-name == github.job
         run: |
@@ -125,5 +125,5 @@ jobs:
       # make deploy
       
       # # # Delete all terraform resources
-      # - name: destroy
+      # - name: tf-destroy
       #   run: make destroy
