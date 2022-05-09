@@ -5,8 +5,14 @@ on:
     branches:
     - main
   pull_request:
+    branches:
+    - main
 
   workflow_dispatch:
+    inputs:
+      job-name:
+        description: 'Job id'
+        required: true
 
 permissions:
   id-token: write
@@ -14,10 +20,10 @@ permissions:
 
 jobs:
 
-  GKE-infra:
-    name: 'gcp infra'
+  gcp-auth:
+    name: 'gcp authetication using Workload Identity'
     runs-on: ubuntu-latest
-    environment: lab
+    environment: dev
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -35,6 +41,19 @@ jobs:
           service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
           create_credentials_file: true
       
+  gke-infra-build:
+    name: 'gcp infra build'
+    runs-on: ubuntu-latest
+    needs:
+      - gcp-auth
+    environment: dev
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+    
+    steps:
     # Checkout the repository to the GitHub Actions runner
       - name: Checkout
         uses: actions/checkout@v3
@@ -55,32 +74,41 @@ jobs:
       - name: plan
         run: make plan
 
-        # On push to main
-      - name: deploy
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: make deploy
-      
-      # # Delete all terraform resources
-      - name: destroy
-        run: make destroy
-
-  release:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: GKE-infra
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
+      - name: Upload a Terraform Artifact
+        uses: actions/upload-artifact@v2.2.4
         with:
-          node-version: 14.x
+          name: 'terraform-plan'
+          path: 'plan.tfplan'
 
-      - name: Install dependencies
-        run: npm install
+  gke-infra-deploy:
+    name: 'gcp infra deployment'
+    runs-on: ubuntu-latest
+    needs:
+      - gke-infra-build
+    environment: dev
 
-      - name: Release
-        run: npm run release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+    
+    steps:
+      # On push to main
+      # - uses: actions/checkout@v2
+      - name: Download a Terraform Artifact
+        uses: actions/download-artifact@v2.2.4
+        with:
+          name: 'terraform-plan'
+          path: 'plan.tfplan'
+    
+      - name: deploy
+        if: github.event.inputs.job-name == github.job
+        # if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.job-name == github.job
+        run: |
+          echo "${github.job}"
+          ls -la
+      # make deploy
+      
+      # # # Delete all terraform resources
+      # - name: destroy
+      #   run: make destroy
