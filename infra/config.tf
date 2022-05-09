@@ -2,7 +2,7 @@
 provider "google" {
   project = var.provider_project_id
   region  = var.region
-  credentials = var.credentials_file_path
+  credentials = var.gcp_application_credentials
 }
 
 provider "kubernetes" {

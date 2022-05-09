@@ -33,8 +33,8 @@ jobs:
       id-token: write
       contents: read
 
-    outputs:
-      credentials_file_path: ${{ steps.auth.outputs.credentials_file_path }}
+    # outputs:
+    #   credentials_file_path: ${{ steps.auth.outputs.credentials_file_path }}
     
     steps:
       - id: 'auth'
@@ -46,6 +46,9 @@ jobs:
           workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}/providers/${{ secrets.GCP_IDENTITY_PROVIDER }}'
           service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
           create_credentials_file: true
+        run: |
+          echo "${GOOGLE_APPLICATION_CREDENTIALS}"
+          echo "${access_token}"
       
   gke-infra-build:
     name: 'gcp-infra-build'
@@ -71,9 +74,10 @@ jobs:
       # Initialize a new or existing Terraform working directory by creating initial files
       - name: init
         run: |
+          echo "${{ needs.gcp-auth.outputs.GOOGLE_APPLICATION_CREDENTIALS }}"
           make init
         env:
-          TF_VAR_credentials_file_path: ${{ needs.gcp-auth.outputs.credentials_file_path }}
+          TF_VAR_gcp_application_credentials: ${{ needs.gcp-auth.outputs.GOOGLE_APPLICATION_CREDENTIALS }}
 
       # Checks terraform syntax
       - name: validate
