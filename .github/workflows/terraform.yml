@@ -86,6 +86,28 @@ jobs:
         shell: bash
     
     steps:
+    # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0.4.0'
+        with:
+          token_format: 'access_token'
+          access_token_lifetime: 900s
+          workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}/providers/${{ secrets.GCP_IDENTITY_PROVIDER }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
+          create_credentials_file: true
+
+      # Install the latest version of Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      # Initialize a new or existing Terraform working directory by creating initial files
+      - name: tf-init
+        run: make init
+        
       # On push to main
       # - uses: actions/checkout@v2
       - name: Download a Terraform Artifact

@@ -27,13 +27,13 @@ module "kubernetes-engine" {
 
   cluster_resource_labels = {
     application = local.service.application
-    environment = var.env
+    environment = local.common_tags.env
   }
 
   node_pools_labels = {
     all = {
       application = local.service.application
-      environment = var.env
+      environment = local.common_tags.env
       gke_node    = true
       gke_cluster = local.gke.cluster_name
     }
