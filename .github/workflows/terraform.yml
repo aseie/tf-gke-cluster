@@ -75,7 +75,7 @@ jobs:
 
       - name: List files
         run: |
-          ls -la
+          ls -la ./infra/
       
   gke-infra-deploy:
     name: 'gcp-infra-deploy'
