@@ -118,8 +118,8 @@ jobs:
       - name: tf-deploy
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.job-name == github.job
         run: |
-          echo "${github.job}"
-          ls -la ${{ github.workspace }}/
+          echo "Tags: ${{ github.event.inputs.job-name }}" 
+      # echo "${github.job}"
       # make deploy
       
       # # # Delete all terraform resources
