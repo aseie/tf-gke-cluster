@@ -77,7 +77,7 @@ jobs:
         run: |
           ls -la ./infra/
 
-      - name: List files workspace
+      - name: List workspace files 
         run: |
           ls -la ${{ github.workspace }}/
       
