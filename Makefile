@@ -5,10 +5,10 @@ validate:
 	cd ./infra && terraform validate
 
 plan:
-	cd ./infra && terraform plan -out ../plan.tfplan
+	cd ./infra && terraform plan -out ${GITHUB_WORKSPACE}/plan.tfplan
 
 deploy:
-	cd ./infra && terraform apply -input=false -auto-approve ../plan.tfplan
+	cd ./infra && terraform apply -input=false -auto-approve ${GITHUB_WORKSPACE}/plan.tfplan
 
 destroy:
 	cd ./infra && terraform destroy -input=false -auto-approve

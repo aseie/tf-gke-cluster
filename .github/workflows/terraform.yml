@@ -8,11 +8,11 @@ on:
     branches:
     - main
 
-  # workflow_dispatch:
-  #   inputs:
-  #     job-name:
-  #       description: 'Job id'
-  #       required: true
+  workflow_dispatch:
+    inputs:
+      job-name:
+        description: 'Job id'
+        required: true
 
 permissions:
   id-token: write
@@ -72,14 +72,6 @@ jobs:
         with:
           name: 'terraform-plan'
           path: '${{ github.workspace }}/plan.tfplan'
-
-      - name: List files
-        run: |
-          ls -la ./infra/
-
-      - name: List workspace files 
-        run: |
-          ls -la ${{ github.workspace }}/
       
   gke-infra-deploy:
     name: 'gcp-infra-deploy'
@@ -122,8 +114,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: 'terraform-plan'
-          # path: 'plan.tfplan'
     
+      - name: list files
+        # if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.job-name == github.job
+        run: |
+          echo "${github.job}"
+          ls -la ${{ github.workspace }}/
+
       - name: tf-deploy
         if: github.event.inputs.job-name == github.job
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.job-name == github.job
