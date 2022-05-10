@@ -8,11 +8,11 @@ on:
     branches:
     - main
 
-  workflow_dispatch:
-    inputs:
-      job-name:
-        description: 'Job id'
-        required: true
+  # workflow_dispatch:
+  #   inputs:
+  #     job-name:
+  #       description: 'Job id'
+  #       required: true
 
 permissions:
   id-token: write
