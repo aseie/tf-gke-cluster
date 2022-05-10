@@ -118,7 +118,7 @@ jobs:
       - name: list files
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.job-name == github.job
         run: |
-          echo "${github.job}"
+          echo "${{ github.job }}"
           ls -la ${{ github.workspace }}/
 
       - name: tf-deploy
