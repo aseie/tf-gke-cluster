@@ -77,6 +77,7 @@ jobs:
   gke-infra-deploy:
     name: 'gcp-infra-deploy'
     runs-on: ubuntu-latest
+    if: github.event.inputs.job-name == github.job
     needs:
       - gke-infra-build
     environment: dev
@@ -115,7 +116,6 @@ jobs:
           name: 'terraform-plan'
 
       - name: tf-deploy
-        if: github.event.inputs.job-name == github.job
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.job-name == github.job
         run: |
           echo "${github.job}"
