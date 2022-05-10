@@ -71,11 +71,15 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: 'terraform-plan'
-          path: 'plan.tfplan'
+          path: '${{ github.workspace }}/plan.tfplan'
 
       - name: List files
         run: |
           ls -la ./infra/
+
+      - name: List files workspace
+        run: |
+          ls -la ${{ github.workspace }}/
       
   gke-infra-deploy:
     name: 'gcp-infra-deploy'
@@ -125,7 +129,7 @@ jobs:
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.job-name == github.job
         run: |
           echo "${github.job}"
-          ls -la
+          ls -la ${{ github.workspace }}/
       # make deploy
       
       # # # Delete all terraform resources
