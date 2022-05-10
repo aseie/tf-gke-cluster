@@ -42,15 +42,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v0.4.0'
-        with:
-          token_format: 'access_token'
-          access_token_lifetime: 900s
-          workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}/providers/${{ secrets.GCP_IDENTITY_PROVIDER }}'
-          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
-          create_credentials_file: true
+      - uses: ./.github/workflows/gcp_auth.yml
 
       # Install the latest version of Terraform CLI
       - name: Setup Terraform
@@ -92,15 +84,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v0.4.0'
-        with:
-          token_format: 'access_token'
-          access_token_lifetime: 900s
-          workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}/providers/${{ secrets.GCP_IDENTITY_PROVIDER }}'
-          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
-          create_credentials_file: true
+      - uses: ./.github/workflows/gcp_auth.yml
 
       # Install the latest version of Terraform CLI
       - name: Setup Terraform
@@ -118,9 +102,8 @@ jobs:
       - name: tf-deploy
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.job-name == github.job
         run: |
-          echo "Tags: ${{ github.event.inputs.job-name }}" 
-      # echo "${github.job}"
-      # make deploy
+          make deploy
+        # echo "Tags: ${{ github.event.inputs.job-name }}" 
       
       # # # Delete all terraform resources
       # - name: tf-destroy
