@@ -1,0 +1,209 @@
+name: 'gke-infra'
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+  workflow_dispatch:
+    inputs:
+      job-name:
+        description: 'Job id'
+        required: true
+        default: gke-infra-deploy
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TF_VAR_project_id: "${{ secrets.GCP_PROJECT_ID}}"
+  TF_VAR_region: "europe-west3"
+  TF_VAR_owner: "Adriano Seie"
+  TF_VAR_environment: "dev"
+
+jobs:
+
+  gke-infra-build:
+    name: 'gcp-infra-build'
+    runs-on: ubuntu-latest
+    environment: dev
+  
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+    
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: "gcp-auth"
+        uses: AdrianoVS/actions-templates/gcp-auth@main
+        with:
+          token_format: 'access_token'
+          access_token_lifetime: 900s
+          create_credentials_file: true
+          GCP_PROJECT_NUMBER: ${{ secrets.GCP_PROJECT_NUMBER }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          GCP_IDENTITY_PROVIDER_POOL: ${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}
+          GCP_IDENTITY_PROVIDER: ${{ secrets.GCP_IDENTITY_PROVIDER }}
+    
+      # Install the latest version of Terraform CLI
+      - name: "terraform-prep"
+        uses: AdrianoVS/actions-templates/terraform@main
+
+      # Generates an execution plan for Terraform
+      - name: tf-plan
+        run: make plan
+
+      - name: Upload tf-plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: 'terraform-plan'
+          path: '${{ github.workspace }}/plan.tfplan'
+      
+  gke-infra-deploy:
+    name: 'gcp-infra-deploy'
+    runs-on: ubuntu-latest
+    if: github.event.inputs.job-name == github.job
+    needs:
+      - gke-infra-build
+    environment: dev
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+    
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: "gcp-auth"
+        uses: AdrianoVS/actions-templates/gcp-auth@main
+        with:
+          token_format: 'access_token'
+          access_token_lifetime: 900s
+          create_credentials_file: true
+          GCP_PROJECT_NUMBER: ${{ secrets.GCP_PROJECT_NUMBER }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          GCP_IDENTITY_PROVIDER_POOL: ${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}
+          GCP_IDENTITY_PROVIDER: ${{ secrets.GCP_IDENTITY_PROVIDER }}
+
+      # Install the latest version of Terraform CLI
+      - name: "terraform-prep"
+        uses: AdrianoVS/actions-templates/terraform@main
+
+      - name: Download a tf-plan
+        uses: actions/download-artifact@v3
+        with:
+          name: 'terraform-plan'
+
+      - name: tf-deploy
+        # if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.job-name == github.job
+        run: make deploy
+        
+  # gke-infra-destroy:
+  #   name: 'gcp-infra-destroy'
+  #   runs-on: ubuntu-latest
+  #   environment: dev
+
+  #   # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+  #   defaults:
+  #     run:
+  #       shell: bash
+    
+  #   steps:
+  #   # Checkout the repository to the GitHub Actions runner
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+
+  #     - name: "gcp-auth"
+  #       uses: AdrianoVS/actions-templates@main
+  #       with:
+  #         token_format: 'access_token'
+  #         access_token_lifetime: 900s
+  #         create_credentials_file: true
+  #         GCP_PROJECT_NUMBER: ${{ secrets.GCP_PROJECT_NUMBER }}
+  #         GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  #         GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+  #         GCP_IDENTITY_PROVIDER_POOL: ${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}
+  #         GCP_IDENTITY_PROVIDER: ${{ secrets.GCP_IDENTITY_PROVIDER }}
+
+  #     # Install the latest version of Terraform CLI
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v1
+
+  #     # Initialize a new or existing Terraform working directory by creating initial files
+  #     - name: tf-init
+  #       run: make init
+
+  #     # # Delete all terraform resources
+  #     - name: tf-destroy
+  #       run: make destroy
+      
+# SLACK configuration
+# https://api.slack.com/apps
+# Create a New App ➜ App Name and Choose Slack Workspace ➜ Incoming Webhooks — Toggle Activate Incoming Webhooks ➜ Add New Webhook to Workspace ➜ Select Slack Channel.
+
+  slack_channel_notification:
+    name: 'Slack Notification'
+    runs-on: ubuntu-latest
+    needs:
+      - gke-infra-build
+      - gke-infra-deploy
+    if: always()
+
+    steps:
+      - name: "tf-plan notify on slack"
+        uses: AdrianoVS/actions-templates/slack@main
+        with:
+          SLACK_CHANNEL: OG-github-actions
+          SLACK_COLOR: ${{ needs.gke-infra-build.result }}
+          SLACK_TITLE: ${{ github.repository }}
+          SLACK_MESSAGE: ${{ github.event.head_commit.message }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_FOOTER: 'Terraform Github Actions Main Branch Alert'
+      
+      - name: "tf-deploy notify on slack"
+        uses: AdrianoVS/actions-templates/slack@main
+        with:
+          SLACK_CHANNEL: OG-github-actions
+          SLACK_COLOR: ${{ needs.gke-infra-deploy.result }}
+          SLACK_TITLE: ${{ github.repository }}
+          SLACK_MESSAGE: ${{ github.event.head_commit.message }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_FOOTER: 'Terraform Github Actions Main Branch Alert'
+    
+    
+    # - uses: actions/checkout@v2 
+
+    # - name: Apply Slack Notification
+    #   uses: rtCamp/action-slack-notify@v2
+    #   # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    #   env:
+    #     SLACK_CHANNEL: OG-github-actions
+    #     SLACK_COLOR: ${{ needs.gke-infra-deploy.result }}
+    #     SLACK_TITLE: ${{ github.repository }}
+    #     SLACK_MESSAGE: ${{ github.event.head_commit.message }}
+    #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+    #     SLACK_FOOTER: 'Terraform Github Actions Main Branch Alert'
+    
+    # - name: Plan Slack Notification
+    #   uses: rtCamp/action-slack-notify@v2
+    #   # if: github.ref != 'refs/heads/main' && github.event_name == 'push'
+    #   env:
+    #     SLACK_CHANNEL: OG-github-actions
+    #     SLACK_COLOR: ${{ needs.gke-infra-build.result }}
+    #     SLACK_TITLE: ${{ github.repository }}
+    #     SLACK_MESSAGE: ${{ github.event.head_commit.message }}
+    #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+    #     SLACK_FOOTER: 'Terraform Github Actions Feature Branch Push Alert'

@@ -79,7 +79,7 @@ variable "gke_additional_master_authorized_networks" {
     display_name = string
   }))
   description = "List of the additional Master Authorized Networks for the GKE cluster."
-  default     = []
+  default     = ["0.0.0.0/0"]
 }
 
 variable "gke_cluster_admins" {

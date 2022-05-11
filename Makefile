@@ -1,6 +1,9 @@
 init:
 	cd ./infra && terraform init
 
+fmt:
+	cd ./infra && terraform fmt
+
 validate:
 	cd ./infra && terraform validate
 
