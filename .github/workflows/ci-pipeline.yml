@@ -143,11 +143,6 @@ jobs:
       - name: "terraform-prep"
         uses: AdrianoVS/actions-templates/terraform@main
 
-      - name: Download a tf-plan
-        uses: actions/download-artifact@v3
-        with:
-          name: 'terraform-plan'
-
       - name: tf-deploy
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.job-name == github.job
         run: make destroy
