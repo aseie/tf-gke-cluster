@@ -43,7 +43,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: "gcp-auth"
-        uses: AdrianoVS/actions-templates/gcp-auth@main
+        uses: aseie/actions-templates/gcp-auth@main
         with:
           token_format: 'access_token'
           access_token_lifetime: 900s
@@ -56,7 +56,7 @@ jobs:
     
       # Install the latest version of Terraform CLI
       - name: "terraform-prep"
-        uses: AdrianoVS/actions-templates/terraform@main
+        uses: aseie/actions-templates/terraform@main
 
       # Generates an execution plan for Terraform
       - name: tf-plan
@@ -87,7 +87,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: "gcp-auth"
-        uses: AdrianoVS/actions-templates/gcp-auth@main
+        uses: aseie/actions-templates/gcp-auth@main
         with:
           token_format: 'access_token'
           access_token_lifetime: 900s
@@ -100,7 +100,7 @@ jobs:
 
       # Install the latest version of Terraform CLI
       - name: "terraform-prep"
-        uses: AdrianoVS/actions-templates/terraform@main
+        uses: aseie/actions-templates/terraform@main
 
       - name: Download a tf-plan
         uses: actions/download-artifact@v3
@@ -128,7 +128,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: "gcp-auth"
-        uses: AdrianoVS/actions-templates/gcp-auth@main
+        uses: aseie/actions-templates/gcp-auth@main
         with:
           token_format: 'access_token'
           access_token_lifetime: 900s
@@ -141,7 +141,7 @@ jobs:
 
       # Install the latest version of Terraform CLI
       - name: "terraform-prep"
-        uses: AdrianoVS/actions-templates/terraform@main
+        uses: aseie/actions-templates/terraform@main
 
       - name: tf-deploy
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.job-name == github.job
@@ -162,7 +162,7 @@ jobs:
 
     steps:
       - name: "tf-deploy notify on slack"
-        uses: AdrianoVS/actions-templates/slack@main
+        uses: aseie/actions-templates/slack@main
         with:
           SLACK_CHANNEL: OG-github-actions
           SLACK_COLOR: ${{ needs.gke-infra-deploy.result }}
