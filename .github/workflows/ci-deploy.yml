@@ -31,6 +31,10 @@ jobs:
         shell: bash
     
     steps:
+    # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: "gcp-auth"
         uses: aseie/actions-templates/gcp-auth@main
         with:
