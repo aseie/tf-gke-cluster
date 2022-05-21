@@ -48,7 +48,6 @@ jobs:
         uses: aseie/actions-templates/terraform@main
 
       - name: tf-destroy
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: make destroy
       
 # SLACK configuration
