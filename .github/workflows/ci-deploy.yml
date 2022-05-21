@@ -1,4 +1,4 @@
-name: 'gke-infra'
+name: 'gke-infra-deploy'
 
 on:
   push:
@@ -7,13 +7,6 @@ on:
   pull_request:
     branches:
     - main
-
-  # workflow_dispatch:
-  #   inputs:
-  #     job-name:
-  #       description: 'Job id'
-  #       required: true
-  #       default: gke-infra-deploy
 
 permissions:
   id-token: write
@@ -46,7 +39,7 @@ jobs:
         uses: aseie/actions-templates/gcp-auth@main
         with:
           token_format: 'access_token'
-          access_token_lifetime: 900s
+          access_token_lifetime: 300s
           create_credentials_file: true
           GCP_PROJECT_NUMBER: ${{ secrets.GCP_PROJECT_NUMBER }}
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -110,42 +103,6 @@ jobs:
       - name: tf-deploy
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.job-name == github.job
         run: make deploy
-      
-  gke-infra-destroy:
-    name: 'gcp-infra-destroy'
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: dev
-
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    defaults:
-      run:
-        shell: bash
-    
-    steps:
-    # Checkout the repository to the GitHub Actions runner
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: "gcp-auth"
-        uses: aseie/actions-templates/gcp-auth@main
-        with:
-          token_format: 'access_token'
-          access_token_lifetime: 900s
-          create_credentials_file: true
-          GCP_PROJECT_NUMBER: ${{ secrets.GCP_PROJECT_NUMBER }}
-          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-          GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-          GCP_IDENTITY_PROVIDER_POOL: ${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}
-          GCP_IDENTITY_PROVIDER: ${{ secrets.GCP_IDENTITY_PROVIDER }}
-
-      # Install the latest version of Terraform CLI
-      - name: "terraform-prep"
-        uses: aseie/actions-templates/terraform@main
-
-      - name: tf-deploy
-        # if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.job-name == github.job
-        run: make destroy
       
 # SLACK configuration
 # https://api.slack.com/apps
