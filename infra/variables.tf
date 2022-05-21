@@ -1,13 +1,12 @@
-variable "provider_project_id" {
+variable "project_id" {
   description = "Project to be used within the GCP Provider."
   type        = string
-  default     = "adrianoseie-lab"
+  # default     = "adrianoseie-lab"
 }
 
-variable "env" {
+variable "environment" {
   type        = string
   description = "Environment identifier for the resources."
-  default     = "dev"
 }
 
 variable "prefix" {
@@ -80,7 +79,12 @@ variable "gke_additional_master_authorized_networks" {
     display_name = string
   }))
   description = "List of the additional Master Authorized Networks for the GKE cluster."
-  default     = []
+  default     = [
+    {
+      display_name = "devops"
+      cidr_block = "0.0.0.0/0"
+    }
+      ]
 }
 
 variable "gke_cluster_admins" {
@@ -137,13 +141,12 @@ variable "cloudnat_enabled" {
   default     = true
 }
 variable "region" {
-  default = "europe-west3"
+  # default = "europe-west3"
 }
 
 variable "project_name" {
-  default = "adriano-seie-labs"
+  default = "gke-aseie-labs"
 }
 
 variable "owner" {
-  default = "adriano_seie"
 }

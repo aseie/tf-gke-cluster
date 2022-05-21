@@ -2,7 +2,7 @@ module "kubernetes-engine" {
   source  = "registry.terraform.io/terraform-google-modules/kubernetes-engine/google//modules/private-cluster"
   version = "18.0.0"
 
-  project_id = var.provider_project_id
+  project_id = var.project_id
   zones      = data.google_compute_zones.available.names
   region     = var.region
   name       = local.gke.cluster_name
@@ -27,13 +27,13 @@ module "kubernetes-engine" {
 
   cluster_resource_labels = {
     application = local.service.application
-    environment = var.env
+    environment = local.common_tags.env
   }
 
   node_pools_labels = {
     all = {
       application = local.service.application
-      environment = var.env
+      environment = local.common_tags.env
       gke_node    = true
       gke_cluster = local.gke.cluster_name
     }

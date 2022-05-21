@@ -14,7 +14,7 @@ module "helm_charts" {
 
   source = "./modules/helm-charts"
 
-  project_id                     = var.provider_project_id
+  project_id                     = var.project_id
   subnetwork                     = local.network.gke_subnet_name
   cert_manager_issuer_email      = var.helm_cert_manager_issuer_email
   global_resource_prefix         = local.global_resource_prefix
