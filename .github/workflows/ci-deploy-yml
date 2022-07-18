@@ -28,13 +28,11 @@ jobs:
       - click-ins
     environment: dev
   
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
         shell: bash
     
     steps:
-    # Checkout the repository to the GitHub Actions runner
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -50,11 +48,9 @@ jobs:
           GCP_IDENTITY_PROVIDER_POOL: ${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}
           GCP_IDENTITY_PROVIDER: ${{ secrets.GCP_IDENTITY_PROVIDER }}
     
-      # Install the latest version of Terraform CLI
       - name: "terraform-prep"
         uses: aseie/actions-templates/terraform@main
 
-      # Generates an execution plan for Terraform
       - name: tf-plan
         run: make plan
 
@@ -72,13 +68,11 @@ jobs:
       - gke-infra-build
     environment: dev
 
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
         shell: bash
     
     steps:
-    # Checkout the repository to the GitHub Actions runner
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -94,7 +88,6 @@ jobs:
           GCP_IDENTITY_PROVIDER_POOL: ${{ secrets.GCP_IDENTITY_PROVIDER_POOL }}
           GCP_IDENTITY_PROVIDER: ${{ secrets.GCP_IDENTITY_PROVIDER }}
 
-      # Install the latest version of Terraform CLI
       - name: "terraform-prep"
         uses: aseie/actions-templates/terraform@main
 
