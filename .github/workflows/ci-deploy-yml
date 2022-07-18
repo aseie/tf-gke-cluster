@@ -22,7 +22,10 @@ jobs:
 
   gke-infra-build:
     name: 'gcp-infra-build'
-    runs-on: ubuntu-latest
+    runs-on:
+      - self-hosted
+      - gpu
+      - click-ins
     environment: dev
   
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
